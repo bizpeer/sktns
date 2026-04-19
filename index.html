@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK TNS: Digital Information Memorandum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f4f8; /* Pale blue background */
+            color: #1e293b;
+        }
+        /* Mandatory Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 380px;
+            }
+        }
+        .nav-link.active {
+            color: #2563eb;
+            font-weight: 700;
+            border-bottom: 2px solid #2563eb;
+        }
+        .tab-btn.active {
+            background-color: #1e3a8a;
+            color: white;
+        }
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-200 selection:text-blue-900">
+
+<!-- Chosen Palette: Corporate Trust (Pale Blue #f0f4f8, Navy Blue #1e3a8a, Accent Blue #2563eb, Clean White #ffffff, Slate #475569) -->
+<!-- Application Structure Plan: The SPA is structured as a 'Digital Information Memorandum (IM)' tailored for investors. It uses a single-page scrolling dashboard layout with clear thematic sections: Executive Summary (Hero), Financial & Market Position (Overview), Core Business Areas (Tabs for Telecom vs IDC), Investment Highlights (Grid), Deal Structure (Visual Breakdown), and Value-up Strategy (Timeline). This linear but interactive flow allows investors to grasp the high-level metrics immediately, drill down into specific business units via tabs, and understand the deal mechanics and future vision seamlessly without losing context. -->
+<!-- Visualization & Content Choices: 
+1. Financial & Capacity Charts (Bar Charts - Chart.js): To compare FY24 vs FY25.4Q revenue/profit and showcase the #1 market position in construction capacity against competitors. Bar charts are optimal for direct magnitude comparison.
+2. Market Share & Deal Structure (Doughnut/Pie Charts - Chart.js): To visualize SK TNS's dominant 80-85% share in SKT/SKB networks and the composition of the 850B KRW fund. Parts-to-whole relationships are best shown this way.
+3. Business Areas (Interactive Tabs): To separate the mature Telecom business from the growing IDC EPC business, preventing information overload and allowing users to focus on one vertical at a time.
+4. Value-up Strategy (HTML/CSS Timeline/Stepper): To show the chronological roadmap post-M&A (AIDC setup -> NASDAQ -> 6G Expansion). No SVG used; relies on Tailwind border and flex utilities.
+-->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-sm z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center gap-2 cursor-pointer" onclick="scrollToSection('home')">
+                        <div class="w-8 h-8 bg-blue-900 rounded font-bold text-white flex items-center justify-center text-xs">SK</div>
+                        <span class="font-bold text-xl text-blue-900 tracking-tight">TNS <span class="text-sm font-normal text-slate-500 ml-1 hidden sm:inline-block">Digital IM</span></span>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <button onclick="scrollToSection('overview')" class="nav-link text-slate-600 hover:text-blue-600 px-1 py-2 text-sm font-medium transition-colors">기업 현황</button>
+                    <button onclick="scrollToSection('business')" class="nav-link text-slate-600 hover:text-blue-600 px-1 py-2 text-sm font-medium transition-colors">핵심 사업</button>
+                    <button onclick="scrollToSection('highlights')" class="nav-link text-slate-600 hover:text-blue-600 px-1 py-2 text-sm font-medium transition-colors">투자 포인트</button>
+                    <button onclick="scrollToSection('deal')" class="nav-link text-slate-600 hover:text-blue-600 px-1 py-2 text-sm font-medium transition-colors">거래 구조</button>
+                    <button onclick="scrollToSection('strategy')" class="nav-link text-slate-600 hover:text-blue-600 px-1 py-2 text-sm font-medium transition-colors">성장 전략</button>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="flex items-center md:hidden">
+                    <button id="mobile-menu-btn" class="text-slate-600 hover:text-blue-900 focus:outline-none">
+                        <span class="text-2xl">&#9776;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 shadow-lg">
+                <button onclick="scrollToSection('overview')" class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md">기업 현황</button>
+                <button onclick="scrollToSection('business')" class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md">핵심 사업</button>
+                <button onclick="scrollToSection('highlights')" class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md">투자 포인트</button>
+                <button onclick="scrollToSection('deal')" class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md">거래 구조</button>
+                <button onclick="scrollToSection('strategy')" class="block w-full text-left px-3 py-2 text-base font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-md">성장 전략</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-16">
+        
+        <!-- Hero Section -->
+        <section id="home" class="relative bg-blue-900 text-white py-20 lg:py-32 overflow-hidden">
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#fff 1px, transparent 1px); background-size: 30px 30px;"></div>
+            <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+                <span class="px-3 py-1 bg-blue-800 text-blue-200 rounded-full text-xs font-bold tracking-wider uppercase mb-6 shadow-sm border border-blue-700">Strictly Confidential &bull; Project DI</span>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-tight">
+                    글로벌 하이퍼스케일 AI 인프라 <br class="hidden sm:block"/> 리더로의 도약
+                </h1>
+                <p class="mt-4 text-xl sm:text-2xl text-blue-200 max-w-3xl mb-10 font-light">
+                    국내 1위 통신 인프라 기업 SK TNS 경영권 인수 및 <br class="hidden md:block"/>5,000억 원 대규모 유상증자를 통한 종합 밸류업 프로젝트
+                </p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mt-8">
+                    <div class="bg-white/10 backdrop-blur-sm border border-white/20 p-5 rounded-xl text-center hover:bg-white/20 transition cursor-default">
+                        <div class="text-blue-200 text-sm font-medium mb-1">목표 기업가치</div>
+                        <div class="text-3xl font-bold">3,500<span class="text-lg font-normal">억 원</span></div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm border border-white/20 p-5 rounded-xl text-center hover:bg-white/20 transition cursor-default">
+                        <div class="text-blue-200 text-sm font-medium mb-1">신규 펀드 규모</div>
+                        <div class="text-3xl font-bold">8,500<span class="text-lg font-normal">억 원</span></div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm border border-white/20 p-5 rounded-xl text-center hover:bg-white/20 transition cursor-default">
+                        <div class="text-blue-200 text-sm font-medium mb-1">통신 인프라 점유율</div>
+                        <div class="text-3xl font-bold text-orange-400">1<span class="text-lg font-normal text-white">위</span></div>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm border border-white/20 p-5 rounded-xl text-center hover:bg-white/20 transition cursor-default">
+                        <div class="text-blue-200 text-sm font-medium mb-1">기존 주주 예상 IRR</div>
+                        <div class="text-3xl font-bold">4.2<span class="text-lg font-normal">%</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Overview Section -->
+        <section id="overview" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 inline-block relative">
+                        기업 현황 및 재무 지표
+                        <span class="absolute bottom-0 left-0 w-1/2 h-1 bg-blue-600 rounded"></span>
+                    </h2>
+                    <p class="text-slate-600 text-lg max-w-4xl">
+                        SK TNS는 1995년 설립 이래 대한민국 통신 인프라 구축의 중추적인 역할을 담당해 온 전문 시공 기업입니다. 견고한 재무 건전성과 무차입 경영을 바탕으로 압도적인 시장 지위를 유지하고 있습니다. 본 섹션에서는 기업의 기초 체력과 경쟁사 대비 우위를 시각화하여 제공합니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                    <!-- Financial Performance -->
+                    <div class="bg-slate-50 p-6 lg:p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="text-2xl text-blue-600">&#128200;</span> 안정적 수익 및 유동성
+                        </h3>
+                        <div class="chart-container mb-6">
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mt-6">
+                            <div class="bg-white p-4 rounded-xl border border-slate-200">
+                                <div class="text-sm text-slate-500 mb-1">보유 현금 및 예치금</div>
+                                <div class="text-2xl font-bold text-slate-900">1,355<span class="text-base font-normal">억 원</span></div>
+                                <div class="text-xs text-green-600 mt-1">&#10003; 완전 무차입 경영</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-xl border border-slate-200">
+                                <div class="text-sm text-slate-500 mb-1">기업 신용 평가</div>
+                                <div class="text-2xl font-bold text-blue-700">A+</div>
+                                <div class="text-xs text-slate-400 mt-1">FY25.4Q 기준 자산 2,518억</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Market Position -->
+                    <div class="bg-slate-50 p-6 lg:p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition">
+                        <h3 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                            <span class="text-2xl text-orange-500">&#127942;</span> 정보통신공사 시공능력 압도적 1위
+                        </h3>
+                        <div class="chart-container mb-6">
+                            <canvas id="capacityChart"></canvas>
+                        </div>
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-5 mt-6">
+                            <h4 class="font-bold text-blue-900 mb-2">핵심 경쟁력 요약</h4>
+                            <ul class="space-y-2 text-sm text-slate-700">
+                                <li class="flex items-start gap-2">
+                                    <span class="text-blue-600 mt-0.5">&#9656;</span>
+                                    <span>특급/고급 기술자 중심의 전문 인력 보유 (기술인력 중 50% 이상)</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-blue-600 mt-0.5">&#9656;</span>
+                                    <span>전국 권역 지사망 및 100여 개 핵심 협력사(BP) 통합 관리 시스템</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <span class="text-blue-600 mt-0.5">&#9656;</span>
+                                    <span>ISO 9001, 14001, 45001, 37001 다수 국제 인증 보유</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Business Area Section (Interactive Tabs) -->
+        <section id="business" class="py-20 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-10 text-center">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 inline-block relative">
+                        핵심 사업 포트폴리오
+                    </h2>
+                    <p class="text-slate-600 text-lg max-w-3xl mx-auto mt-4">
+                        캐시카우(Cash Cow) 역할을 하는 기존 통신망 인프라 사업과, 미래 폭발적 성장을 견인할 차세대 데이터센터(IDC) EPC 사업으로 구성된 균형 잡힌 포트폴리오를 탐색해 보십시오.
+                    </p>
+                </div>
+
+                <!-- Tabs -->
+                <div class="flex flex-wrap justify-center gap-2 mb-8 border-b border-slate-200 pb-4">
+                    <button onclick="switchTab('telecom')" id="tab-telecom" class="tab-btn active px-6 py-3 rounded-full text-sm font-bold transition shadow-sm bg-blue-900 text-white hover:bg-blue-800">
+                        &#128225; Telecommunication 인프라
+                    </button>
+                    <button onclick="switchTab('idc')" id="tab-idc" class="tab-btn px-6 py-3 rounded-full text-sm font-bold bg-white text-slate-600 border border-slate-200 transition shadow-sm hover:bg-slate-100">
+                        &#128424; 데이터센터(IDC) EPC
+                    </button>
+                    <button onclick="switchTab('energy')" id="tab-energy" class="tab-btn px-6 py-3 rounded-full text-sm font-bold bg-white text-slate-600 border border-slate-200 transition shadow-sm hover:bg-slate-100">
+                        &#9889; Energy & Industrial IT
+                    </button>
+                </div>
+
+                <!-- Tab Content: Telecom -->
+                <div id="content-telecom" class="tab-content grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-8 rounded-2xl shadow-sm border border-slate-100 transition-opacity duration-500 opacity-100">
+                    <div class="lg:col-span-7 space-y-6">
+                        <h3 class="text-2xl font-bold text-slate-900">SKT/SKB 핵심 파트너 기반 굳건한 시장 지배력</h3>
+                        <p class="text-slate-600 leading-relaxed">
+                            1G부터 5G까지 대한민국 통신 세대의 진화와 함께하며 전국망 시공을 주도해 왔습니다. 통신 인프라 설계, 장비/부자재 구매, 시공 및 유지보수(O&M)까지 전체 Lifecycle을 원스톱으로 제공합니다. 
+                        </p>
+                        <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg">
+                            <h4 class="font-bold text-blue-900 mb-1">SoW (Share of Wallet) 장기 확보</h4>
+                            <p class="text-sm text-slate-700">보안 및 기술적 파트너십이 중요한 통신 시장 특성상, SKT 및 SKB 통신망 시공에서 **80~85%**의 압도적 점유율을 유지하고 있습니다. 현재 GP 매각 관련 핵심 조건으로 '향후 5년 수주 보장 연장'을 확보하여 매출 안정성을 극대화합니다.</p>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="border border-slate-100 p-4 rounded-xl flex items-center gap-3">
+                                <div class="w-10 h-10 bg-green-100 text-green-700 rounded-full flex items-center justify-center text-xl">&#128246;</div>
+                                <div>
+                                    <div class="text-xs text-slate-500">통신 세대 커버리지</div>
+                                    <div class="font-bold text-slate-800">1G ~ 5G 구축 완료</div>
+                                </div>
+                            </div>
+                            <div class="border border-slate-100 p-4 rounded-xl flex items-center gap-3">
+                                <div class="w-10 h-10 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center text-xl">&#128221;</div>
+                                <div>
+                                    <div class="text-xs text-slate-500">6G 시대 대응력</div>
+                                    <div class="font-bold text-slate-800">THz 대역 설계 역량</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-5 bg-slate-50 p-6 rounded-xl border border-slate-100">
+                        <h4 class="text-center font-bold text-slate-700 mb-4">주요 이통사(SKT/SKB) 대상 점유율</h4>
+                        <div class="chart-container" style="height: 250px;">
+                            <canvas id="marketShareChart"></canvas>
+                        </div>
+                        <p class="text-center text-xs text-slate-500 mt-4">* 30년 축적 역량 기반의 단독에 가까운 파트너십</p>
+                    </div>
+                </div>
+
+                <!-- Tab Content: IDC -->
+                <div id="content-idc" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 transition-opacity duration-500 opacity-0">
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-slate-900">미래 AI 시대 핵심 인프라: One-stop IDC EPC</h3>
+                        <p class="text-slate-600 leading-relaxed">
+                            기존 통신 인프라 역량을 바탕으로 데이터센터 시장에 성공적으로 진입했습니다. 부지 선정부터 인허가, Core & Shell(건축), MEP(기계/전기/배관), Fit-out(내부통신망) 및 FM(시설운영)까지 데이터센터 구축 전 과정을 턴키(Turn-key)로 제공합니다.
+                        </p>
+                        <h4 class="font-bold text-slate-800 border-b pb-2 mt-6">주요 수행 및 목표 프로젝트</h4>
+                        <ul class="space-y-3">
+                            <li class="flex justify-between items-center bg-slate-50 p-3 rounded border border-slate-100">
+                                <div class="flex items-center gap-2"><span class="text-lg">&#9989;</span> <span class="font-medium text-slate-700">Project Gamma (진행중)</span></div>
+                                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold">30MW급</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-slate-50 p-3 rounded border border-slate-100">
+                                <div class="flex items-center gap-2"><span class="text-lg">&#128190;</span> <span class="font-medium text-slate-700">SKB 분당/가산/일산/양주 센터</span></div>
+                                <span class="text-xs text-slate-500 font-medium">수행 완료</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-orange-50 p-3 rounded border border-orange-100">
+                                <div class="flex items-center gap-2"><span class="text-lg">&#128640;</span> <span class="font-bold text-orange-800">SKB 울산 AI DC (목표)</span></div>
+                                <span class="bg-orange-200 text-orange-900 px-2 py-1 rounded text-xs font-bold">60MW급</span>
+                            </li>
+                            <li class="flex justify-between items-center bg-orange-50 p-3 rounded border border-orange-100">
+                                <div class="flex items-center gap-2"><span class="text-lg">&#128640;</span> <span class="font-bold text-orange-800">구로 IDC (목표)</span></div>
+                                <span class="bg-orange-200 text-orange-900 px-2 py-1 rounded text-xs font-bold">75MW급</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="bg-gradient-to-br from-slate-800 to-blue-900 p-8 rounded-xl text-white flex flex-col justify-center">
+                        <div class="text-4xl mb-4">&#128187;</div>
+                        <h4 class="text-xl font-bold mb-4">하이퍼스케일 기술력 내재화</h4>
+                        <p class="text-blue-100 text-sm leading-relaxed mb-6">
+                            단순 건축을 넘어 AI 시대 요구되는 특수 냉각 및 전력 설계 기술을 확보하고 있습니다. SDT(Quantum Alliance)와의 제휴를 통해 초저온/액침냉각(Immersion Cooling) 특수 시공 역량을 내재화하여 전력 대비 효율이 극대화된 AI DC 모델을 구축합니다.
+                        </p>
+                        <button onclick="scrollToSection('strategy')" class="mt-auto bg-white/20 hover:bg-white/30 text-white border border-white/40 py-2 px-4 rounded text-sm font-medium transition self-start">
+                            가치 제고(Value-up) 전략 보기 &rarr;
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tab Content: Energy -->
+                <div id="content-energy" class="tab-content hidden grid grid-cols-1 lg:grid-cols-2 gap-8 bg-white p-8 rounded-2xl shadow-sm border border-slate-100 transition-opacity duration-500 opacity-0">
+                    <div class="space-y-6">
+                        <h3 class="text-2xl font-bold text-slate-900">Energy & Industrial IT 솔루션</h3>
+                        <p class="text-slate-600 leading-relaxed">
+                            데이터센터 전력난의 근본적 해결과 산업 현장의 스마트화를 지원합니다. 신재생 에너지와 인프라를 결합하여 미래 지향적인 에너지 자립 및 자동화 솔루션을 제공합니다.
+                        </p>
+                        <div class="grid gap-4 mt-6">
+                            <div class="border border-slate-100 p-5 rounded-xl hover:shadow-md transition">
+                                <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                    <span class="text-green-500">&#9851;</span> Energy Solution
+                                </h4>
+                                <p class="text-sm text-slate-600">ESS, 연료전지, 태양광 등 신재생/친환경 에너지 인프라 설계 및 시공. IDC와 연계한 **'에너지 자립형 DC 모델'** 실현의 핵심 역량입니다.</p>
+                            </div>
+                            <div class="border border-slate-100 p-5 rounded-xl hover:shadow-md transition">
+                                <h4 class="font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                    <span class="text-blue-500">&#9881;</span> Industrial IT
+                                </h4>
+                                <p class="text-sm text-slate-600">SCADA, PLC 기반 모니터링/제어 시스템 구축. 산업 현장의 데이터를 실시간 수집 및 분석하는 스마트팩토리 환경을 구현합니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 flex items-center justify-center p-8 rounded-xl border border-slate-200">
+                         <div class="text-center">
+                            <div class="text-5xl mb-4">&#127758;</div>
+                            <h4 class="text-lg font-bold text-slate-800 mb-2">ESG 리딩 인프라 기업</h4>
+                            <p class="text-sm text-slate-500">그린 에너지 인프라 확장을 통해 탄소 중립(Net Zero) 시대의 요구에 부응하는 차세대 시공 디벨로퍼로 거듭납니다.</p>
+                         </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Investment Highlights Section -->
+        <section id="highlights" class="py-20 bg-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12 text-center">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4">4대 핵심 투자 포인트</h2>
+                    <p class="text-slate-600 text-lg max-w-2xl mx-auto">SK TNS가 글로벌 인프라 리더로 성장할 수밖에 없는 명확한 4가지 근거를 확인하십시오.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Point 1 -->
+                    <div class="group border border-slate-200 rounded-2xl p-8 hover:border-blue-500 hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="text-4xl font-black text-slate-200 mb-2">01</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">6G 통신 인프라 시장의 구조적 성장</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed relative z-10">
+                            FY28 시범테스트 및 FY30 상용화가 예정된 6G는 기존 대비 매우 높은 주파수 대역(THz)을 사용합니다. 이는 수많은 기지국과 중계기 등 **통신 설비의 신규 증설을 필수적**으로 요구하며, 통신 인프라 CAPEX 투자의 대규모 수혜가 가시화되고 있습니다.
+                        </p>
+                    </div>
+                    
+                    <!-- Point 2 -->
+                    <div class="group border border-slate-200 rounded-2xl p-8 hover:border-blue-500 hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="text-4xl font-black text-slate-200 mb-2">02</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">굳건한 SKT/SKB 핵심 파트너십</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed relative z-10">
+                            30년간 축적된 통신 세대별 유·무선 네트워크 구축 경험을 바탕으로 확고한 **1위 파트너십(점유율 80~85%)**을 유지하고 있습니다. 전국 주요 권역 지사망과 100여 개 이상의 협력사 통합 관리 시스템으로 대규모 복합 프로젝트 수행에 최적화되어 있습니다.
+                        </p>
+                    </div>
+
+                    <!-- Point 3 -->
+                    <div class="group border border-slate-200 rounded-2xl p-8 hover:border-blue-500 hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="text-4xl font-black text-slate-200 mb-2">03</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">미래 AI 시대 핵심 인프라 IDC 확장</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed relative z-10">
+                            부지 선정, 건축, 전기/기계, 통신 설비 통합 운영 등 전 과정을 아우르는 **One-stop IDC EPC 터키 역량**을 제공합니다. 가산, 일산, 분당 등 중대형 레퍼런스를 이미 확보했으며, SKB 울산 AI DC(60MW) 등 다수 대형 프로젝트에 참여 예정입니다.
+                        </p>
+                    </div>
+
+                    <!-- Point 4 -->
+                    <div class="group border border-slate-200 rounded-2xl p-8 hover:border-blue-500 hover:shadow-lg transition-all duration-300 relative overflow-hidden bg-white">
+                        <div class="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                        <div class="text-4xl font-black text-slate-200 mb-2">04</div>
+                        <h3 class="text-xl font-bold text-slate-900 mb-3 relative z-10">안정적 Cash Flow & 매력적 재무구조</h3>
+                        <p class="text-slate-600 text-sm leading-relaxed relative z-10">
+                            경기 변동에 둔감한 필수 통신 인프라 매출이 든든한 기반 역할을 하며, **차입금이 없는 견실한 재무 구조**를 유지하고 있습니다. 확보된 막대한 현금성 자산을 바탕으로 향후 자체 데이터센터 건립 및 신규 에너지 사업 확장을 위한 훌륭한 자체 투자 여력을 갖추고 있습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Deal Structure Section -->
+        <section id="deal" class="py-20 bg-slate-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-12">
+                    <h2 class="text-3xl font-bold text-slate-900 mb-4 inline-block relative">
+                        거래 구조 및 펀드 조성 (안)
+                        <span class="absolute bottom-0 left-0 w-1/2 h-1 bg-blue-600 rounded"></span>
+                    </h2>
+                    <p class="text-slate-600 text-lg max-w-4xl">
+                        기존 인수 방식을 활용하여 기존 투자자(LP) 중 일부를 잔존시키고, **5,000억 원의 대규모 유상증자**를 단행하여 직접적인 데이터센터 및 신재생 에너지 자산을 포괄하는 종합회사로 발전하기 위한 전략적 거래입니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+                    <div class="lg:col-span-5 bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
+                        <h3 class="text-center font-bold text-slate-800 mb-6">신규 펀드(PEF) 구성 (총 8,500억 원)</h3>
+                        <div class="chart-container" style="height: 300px;">
+                            <canvas id="dealChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-7 space-y-6">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-blue-600">
+                            <h4 class="font-bold text-lg text-slate-800 mb-3 flex justify-between">
+                                <span>재무적 투자자 (FI)</span>
+                                <span class="text-blue-600">5,000억 원</span>
+                            </h4>
+                            <p class="text-sm text-slate-600 mb-2">산업연합, IBK, NH Bank, 하나은행, Sh Bank 등 주요 기관 (각 1,000억 원) 논의 중. 대규모 유상증자의 핵심 재원.</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-orange-400">
+                            <h4 class="font-bold text-lg text-slate-800 mb-3 flex justify-between">
+                                <span>잔존 LP</span>
+                                <span class="text-orange-500">2,000억 원</span>
+                            </h4>
+                            <p class="text-sm text-slate-600">SK에코플랜트(600억 원) 포함 핵심 투자자 잔존. **핵심 딜 조건:** 2026년 만기인 '5년간 수주 보장' 조건을 5년 추가 연장 추진 기반.</p>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-green-500">
+                            <h4 class="font-bold text-lg text-slate-800 mb-3 flex justify-between">
+                                <span>전략적 투자자 (SI)</span>
+                                <span class="text-green-600">1,500억 원</span>
+                            </h4>
+                            <p class="text-sm text-slate-600">LS일렉트릭(250억), LS전선(250억), 통신장비업체 연합(250억), 외국계 투자자 및 증권사 등 다양한 시너지 파트너 합류.</p>
+                        </div>
+
+                        <div class="mt-6 text-sm text-slate-500 italic px-4">
+                            * 목표 기업가치 3,500억 원 중 기존 LP 상환 1,500억 원, 기존 LP 잔존 2,000억 원으로 구성. 유상증자 대금 5,000억 원은 신규 자산 편입 및 밸류업 재원으로 활용됩니다. (세부 금액 및 참여자 협상 중)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Value-Up Strategy Section (Timeline) -->
+        <section id="strategy" class="py-20 bg-blue-900 text-white">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="mb-16 text-center">
+                    <span class="px-4 py-1 bg-blue-800 rounded-full text-blue-200 text-sm font-bold tracking-wider uppercase mb-4 inline-block border border-blue-700">M&A Post-Deal</span>
+                    <h2 class="text-3xl sm:text-4xl font-bold mb-4">핵심 성장 전략 (Value-up Strategy)</h2>
+                    <p class="text-blue-200 text-lg max-w-3xl mx-auto">
+                        국내 1위 시공사를 넘어 **'글로벌 하이퍼스케일 데이터센터 및 6G·친환경 에너지 엔지니어링 리더(디벨로퍼)'**로 도약하는 청사진입니다.
+                    </p>
+                </div>
+
+                <div class="relative max-w-4xl mx-auto">
+                    <!-- Vertical Line connecting items -->
+                    <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-blue-700 -ml-px"></div>
+
+                    <!-- Step 1 -->
+                    <div class="relative flex items-center justify-between md:justify-normal w-full mb-12">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500 border-4 border-blue-900 shadow absolute left-0 md:left-1/2 transform -translate-x-1/2 z-10 text-xs font-bold">1</div>
+                        <div class="ml-12 md:ml-0 md:w-1/2 md:pr-12 text-left md:text-right">
+                            <h3 class="text-xl font-bold mb-2">차세대 양자·AI 데이터센터 생태계 선점</h3>
+                            <p class="text-blue-200 text-sm leading-relaxed">
+                                SDT(Quantum Alliance) 제휴를 통해 초저온/액침냉각 특수 시공 역량을 내재화합니다. 또한, 글로벌 리츠(Digital Realty)와 합작하여 단순 도급을 벗어난 Turn-key 플레이어로 격상합니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="relative flex items-center justify-between md:justify-normal w-full mb-12">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-blue-400 border-4 border-blue-900 shadow absolute left-0 md:left-1/2 transform -translate-x-1/2 z-10 text-xs font-bold">2</div>
+                        <div class="ml-12 md:ml-0 md:w-1/2 md:pl-12 md:left-1/2 absolute top-0 text-left invisible md:relative md:visible">
+                            <h3 class="text-xl font-bold mb-2">데이터센터 전력난 근본적 해결 (Energy)</h3>
+                            <p class="text-blue-200 text-sm leading-relaxed">
+                                기존 ESS, 수전해, 태양광 시공 역량을 결합한 'One-Energy' 모델을 통해, 외부 전력망에 전적으로 의존하지 않는 완전한 에너지 자립형 DC 솔루션을 시장에 제시합니다.
+                            </p>
+                        </div>
+                        <!-- Mobile View for Step 2 -->
+                        <div class="ml-12 w-full text-left md:hidden block">
+                             <h3 class="text-xl font-bold mb-2">데이터센터 전력난 근본적 해결 (Energy)</h3>
+                            <p class="text-blue-200 text-sm leading-relaxed">
+                                기존 ESS, 수전해, 태양광 시공 역량을 결합한 'One-Energy' 모델을 통해 완전한 에너지 자립형 DC 솔루션을 제시합니다.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="relative flex items-center justify-between md:justify-normal w-full mb-12">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-orange-500 border-4 border-blue-900 shadow absolute left-0 md:left-1/2 transform -translate-x-1/2 z-10 text-xs font-bold">3</div>
+                        <div class="ml-12 md:ml-0 md:w-1/2 md:pr-12 text-left md:text-right">
+                            <h3 class="text-xl font-bold mb-2">압도적 본업 Cash Flow 기반 밸류 방어</h3>
+                            <p class="text-blue-200 text-sm leading-relaxed">
+                                필수 통신망에서 지속 창출되는 매출과 1,355억 원의 현금 유동성을 바탕으로, 6G 대규모 설비 투자 및 High-Growth 섹터(양자, AI, 신재생)에 과감히 재투자하는 선순환 구조를 완성합니다.
+                            </p>
+                        </div>
+                    </div>
+
+                     <!-- Step 4 -->
+                     <div class="relative flex items-center justify-between md:justify-normal w-full">
+                        <div class="flex items-center justify-center w-8 h-8 rounded-full bg-green-500 border-4 border-blue-900 shadow absolute left-0 md:left-1/2 transform -translate-x-1/2 z-10 text-xs font-bold">4</div>
+                        <div class="ml-12 md:ml-0 md:w-1/2 md:pl-12 md:left-1/2 absolute top-0 text-left invisible md:relative md:visible">
+                            <h3 class="text-xl font-bold mb-2">글로벌 자본시장 진출 및 우량 자산 확보</h3>
+                            <p class="text-blue-200 text-sm leading-relaxed">
+                                미국 Dominari 증권 주관 하에 NASDAQ SPAC 상장을 준비합니다. 확보된 자본으로 40MW급 AI Data 센터와 대규모 ESS 센터를 자체 건립하여 1조 원대 자산 보유 디벨로퍼를 목표로 합니다.
+                            </p>
+                        </div>
+                        <!-- Mobile View for Step 4 -->
+                        <div class="ml-12 w-full text-left md:hidden block">
+                             <h3 class="text-xl font-bold mb-2">글로벌 자본시장 진출 및 우량 자산 확보</h3>
+                            <p class="text-blue-200 text-sm leading-relaxed">
+                                미국 Dominari 증권 주관 하에 NASDAQ SPAC 상장을 준비합니다. 40MW급 AI Data 센터 건립으로 1조 원대 자산 보유 디벨로퍼를 목표로 합니다.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 text-slate-400 py-10 text-center text-sm border-t border-slate-800">
+            <div class="max-w-7xl mx-auto px-4">
+                <p class="mb-4">본 문서는 잠재적 투자자들에게 제공하는 Discussion Material을 바탕으로 작성된 Digital IM입니다. 대외비로 취급해 주시기 바랍니다.</p>
+                <div class="flex justify-center items-center gap-4 text-xs">
+                    <span>주관사: Onedays Private Equity</span>
+                    <span>|</span>
+                    <span>문의: Thewillkim@naver.com</span>
+                    <span>|</span>
+                    <span>발행: 2026. 04</span>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Data Storage
+        const financialData = {
+            labels: ['FY24 (11기)', 'FY25.4Q (12기)'],
+            datasets: [
+                {
+                    label: '매출액 (억원)',
+                    data: [7804, 7186],
+                    backgroundColor: '#1e3a8a', // blue-900
+                    borderRadius: 4
+                },
+                {
+                    label: '영업이익 (억원)',
+                    data: [297, 324],
+                    backgroundColor: '#2563eb', // blue-600
+                    borderRadius: 4
+                }
+            ]
+        };
+
+        const capacityData = {
+            labels: ['2021', '2022', '2023', '2024'],
+            datasets: [
+                {
+                    label: 'SK TNS',
+                    data: [2340, 2326, 2586, 2683],
+                    backgroundColor: '#f97316', // orange-500
+                    borderRadius: 4
+                },
+                {
+                    label: '업계 2위',
+                    data: [1515, 1576, 1832, 2077],
+                    backgroundColor: '#cbd5e1', // slate-300
+                    borderRadius: 4
+                }
+            ]
+        };
+
+        const marketShareData = {
+            labels: ['SK TNS', 'Other Providers'],
+            datasets: [{
+                data: [82.5, 17.5], // Using 82.5 as avg of 80-85%
+                backgroundColor: ['#2563eb', '#e2e8f0'],
+                borderWidth: 0,
+                hoverOffset: 4
+            }]
+        };
+
+        const dealData = {
+            labels: ['재무적 투자자 (FI)', '잔존 LP', '전략적 투자자 (SI)'],
+            datasets: [{
+                data: [5000, 2000, 1500],
+                backgroundColor: ['#2563eb', '#f97316', '#22c55e'],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 6
+            }]
+        };
+
+        // Initialize Charts
+        window.onload = function() {
+            // Common Options
+            const commonBarOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { boxWidth: 12, font: { family: "'Noto Sans KR', sans-serif" } } },
+                    tooltip: { mode: 'index', intersect: false, titleFont: { family: "'Noto Sans KR', sans-serif" }, bodyFont: { family: "'Noto Sans KR', sans-serif" } }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { family: "'Noto Sans KR', sans-serif" } } },
+                    x: { grid: { display: false }, ticks: { font: { family: "'Noto Sans KR', sans-serif" } } }
+                },
+                interaction: { mode: 'index', intersect: false }
+            };
+
+            const commonDoughnutOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { family: "'Noto Sans KR', sans-serif" } } },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) label += ': ';
+                                if (context.parsed !== null) label += context.parsed + (context.chart.canvas.id === 'dealChart' ? '억 원' : '%');
+                                return label;
+                            }
+                        },
+                        titleFont: { family: "'Noto Sans KR', sans-serif" }, bodyFont: { family: "'Noto Sans KR', sans-serif" }
+                    }
+                }
+            };
+
+            // Render Financial Chart
+            new Chart(document.getElementById('financialChart'), {
+                type: 'bar',
+                data: financialData,
+                options: commonBarOptions
+            });
+
+            // Render Capacity Chart
+            new Chart(document.getElementById('capacityChart'), {
+                type: 'bar',
+                data: capacityData,
+                options: Object.assign({}, commonBarOptions, {
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } },
+                        title: { display: true, text: '시공능력 평가 추이 (단위: 억 원)', font: { family: "'Noto Sans KR', sans-serif", size: 14 } }
+                    }
+                })
+            });
+
+            // Render Market Share Chart
+            new Chart(document.getElementById('marketShareChart'), {
+                type: 'doughnut',
+                data: marketShareData,
+                options: Object.assign({}, commonDoughnutOptions, {
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                             callbacks: {
+                                label: function(context) {
+                                    return context.label + ': ~' + context.parsed + '%';
+                                }
+                            }
+                        }
+                    }
+                })
+            });
+
+            // Render Deal Chart
+            new Chart(document.getElementById('dealChart'), {
+                type: 'doughnut',
+                data: dealData,
+                options: commonDoughnutOptions
+            });
+        };
+
+        // Functional Navigation (Smooth Scroll)
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if(element) {
+                // Adjust for fixed header
+                const headerOffset = 64; 
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if(!mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+        }
+
+        // Active Nav Link Highlighting on Scroll
+        window.addEventListener('scroll', () => {
+            let current = '';
+            const sections = ['overview', 'business', 'highlights', 'deal', 'strategy'];
+            
+            sections.forEach(section => {
+                const element = document.getElementById(section);
+                const headerOffset = 70;
+                if (element && window.pageYOffset >= (element.offsetTop - headerOffset)) {
+                    current = section;
+                }
+            });
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('onclick').includes(current)) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Interactive Tabs Logic
+        function switchTab(tabId) {
+            // Hide all contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+                content.classList.remove('opacity-100');
+                content.classList.add('opacity-0');
+            });
+            
+            // Deactivate all buttons
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active', 'bg-blue-900', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600');
+            });
+
+            // Show selected content
+            const selectedContent = document.getElementById('content-' + tabId);
+            selectedContent.classList.remove('hidden');
+            // Small delay for fade-in effect
+            setTimeout(() => {
+                selectedContent.classList.remove('opacity-0');
+                selectedContent.classList.add('opacity-100');
+            }, 50);
+
+            // Activate selected button
+            const selectedBtn = document.getElementById('tab-' + tabId);
+            selectedBtn.classList.add('active', 'bg-blue-900', 'text-white');
+            selectedBtn.classList.remove('bg-white', 'text-slate-600');
+        }
+
+        // Mobile Menu Toggle
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+
+    </script>
+</body>
+</html>
